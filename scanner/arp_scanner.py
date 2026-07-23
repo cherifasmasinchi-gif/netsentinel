@@ -32,14 +32,13 @@ if __name__ == "__main__":
     import os
     sys.path.append(os.path.join(os.path.dirname(__file__), ".."))
     from db.database import init_db, save_devices, is_new_device
+    from scanner.port_scanner import scan_ports
 
     ip_range = "192.168.1.0/24"
     print(f"Scanning {ip_range} ...")
     found_devices = scan(ip_range)
 
     print(f"\nFound {len(found_devices)} device(s):\n")
-    print(f"{'IP Address':<18}{'MAC Address':<20}{'Vendor'}")
-    print("-" * 60)
 
     init_db()
 
@@ -48,5 +47,12 @@ if __name__ == "__main__":
         if is_new_device(device["mac"]):
             print(f"   ⚠️  NEW DEVICE DETECTED!")
 
+        open_ports = scan_ports(device["ip"])
+        if open_ports:
+            print(f"   Open ports: {open_ports}")
+        else:
+            print(f"   No common open ports found.")
+        print()
+
     save_devices(found_devices)
-    print("\n✅ Devices saved to database.")
+    print("✅ Devices saved to database.")
