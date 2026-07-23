@@ -59,3 +59,13 @@ def get_all_devices():
 
     conn.close()
     return [dict(row) for row in rows]
+
+def is_new_device(mac):
+    conn = sqlite3.connect(DB_PATH)
+    cursor = conn.cursor()
+
+    cursor.execute("SELECT id FROM devices WHERE mac = ?", (mac,))
+    existing = cursor.fetchone()
+
+    conn.close()
+    return existing is None

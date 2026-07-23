@@ -31,7 +31,7 @@ if __name__ == "__main__":
     import sys
     import os
     sys.path.append(os.path.join(os.path.dirname(__file__), ".."))
-    from db.database import init_db, save_devices
+    from db.database import init_db, save_devices, is_new_device
 
     ip_range = "192.168.1.0/24"
     print(f"Scanning {ip_range} ...")
@@ -40,9 +40,13 @@ if __name__ == "__main__":
     print(f"\nFound {len(found_devices)} device(s):\n")
     print(f"{'IP Address':<18}{'MAC Address':<20}{'Vendor'}")
     print("-" * 60)
-    for device in found_devices:
-        print(f"{device['ip']:<18}{device['mac']:<20}{device['vendor']}")
 
     init_db()
+
+    for device in found_devices:
+        print(f"{device['ip']:<18}{device['mac']:<20}{device['vendor']}")
+        if is_new_device(device["mac"]):
+            print(f"   ⚠️  NEW DEVICE DETECTED!")
+
     save_devices(found_devices)
     print("\n✅ Devices saved to database.")
