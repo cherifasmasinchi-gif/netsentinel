@@ -18,6 +18,16 @@ def init_db():
             last_seen TEXT NOT NULL
         )
     """)
+    cursor.execute("""
+        CREATE TABLE IF NOT EXISTS ports (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            device_mac TEXT NOT NULL,
+            port INTEGER NOT NULL,
+            risk_level TEXT,
+            reason TEXT,
+            scanned_at TEXT NOT NULL
+        )
+    """)
 
     conn.commit()
     conn.close()
@@ -69,3 +79,25 @@ def is_new_device(mac):
 
     conn.close()
     return existing is None
+def save_port_scan(mac, open_ports):
+    """
+    Saves the open ports found for a device into the ports table.
+    Clears out old entries for this device first, so we always
+    reflect the most recent scan.
+    """
+    conn = sqlite3.connect(DB_PATH)
+    cursor = conn.cursor()
+
+    now = datetime.now().isoformat(timespec="seconds")
+
+    # Remove old port records for this device before adding fresh ones
+    cursor.execute("DELETE FROM ports WHERE device_mac = ?", (mac,))
+
+    for p in open_ports:
+        cursor.execute("""
+            INSERT INTO ports (device_mac, port, risk_level, reason, scanned_at)
+            VALUES (?, ?, ?, ?, ?)
+        """, (mac, p["port"], p["risk_level"], p["reason"], now))
+
+    conn.commit()
+    conn.close()

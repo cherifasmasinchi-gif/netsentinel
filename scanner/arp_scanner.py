@@ -1,11 +1,8 @@
 from scapy.all import ARP, Ether, srp
 from mac_vendor_lookup import MacLookup
 
+
 def scan(ip_range):
-    """
-    Sends ARP requests across the given IP range and returns
-    a list of devices that responded, with their IP, MAC, and vendor.
-    """
     arp_request = ARP(pdst=ip_range)
     broadcast = Ether(dst="ff:ff:ff:ff:ff:ff")
     packet = broadcast / arp_request
@@ -31,7 +28,7 @@ if __name__ == "__main__":
     import sys
     import os
     sys.path.append(os.path.join(os.path.dirname(__file__), ".."))
-    from db.database import init_db, save_devices, is_new_device
+    from db.database import init_db, save_devices, is_new_device, save_port_scan
     from scanner.port_scanner import scan_ports
 
     ip_range = "192.168.1.0/24"
@@ -42,33 +39,20 @@ if __name__ == "__main__":
 
     init_db()
 
-    if __name__ == "__main__":
-        import sys
-        import os
-        sys.path.append(os.path.join(os.path.dirname(__file__), ".."))
-        from db.database import init_db, save_devices, is_new_device
-        from scanner.port_scanner import scan_ports
+    for device in found_devices:
+        print(f"{device['ip']:<18}{device['mac']:<20}{device['vendor']}")
+        if is_new_device(device["mac"]):
+            print(f"   ⚠️  NEW DEVICE DETECTED!")
 
-        ip_range = "192.168.1.0/24"
-        print(f"Scanning {ip_range} ...")
-        found_devices = scan(ip_range)
+        open_ports = scan_ports(device["ip"])
+        if open_ports:
+            for p in open_ports:
+                print(f"   Port {p['port']:<6} Risk: {p['risk_level']:<8} {p['reason']}")
+        else:
+            print(f"   No common open ports found.")
 
-        print(f"\nFound {len(found_devices)} device(s):\n")
+        save_port_scan(device["mac"], open_ports)
+        print()
 
-        init_db()
-
-        for device in found_devices:
-            print(f"{device['ip']:<18}{device['mac']:<20}{device['vendor']}")
-            if is_new_device(device["mac"]):
-                print(f"   ⚠️  NEW DEVICE DETECTED!")
-
-            open_ports = scan_ports(device["ip"])
-            if open_ports:
-                for p in open_ports:
-                    print(f"   Port {p['port']:<6} Risk: {p['risk_level']:<8} {p['reason']}")
-            else:
-                print(f"   No common open ports found.")
-            print()
-
-        save_devices(found_devices)
-        print("✅ Devices saved to database.")
+    save_devices(found_devices)
+    print("✅ Devices saved to database.")
