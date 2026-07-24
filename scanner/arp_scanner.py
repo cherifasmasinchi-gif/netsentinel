@@ -42,17 +42,33 @@ if __name__ == "__main__":
 
     init_db()
 
-    for device in found_devices:
-        print(f"{device['ip']:<18}{device['mac']:<20}{device['vendor']}")
-        if is_new_device(device["mac"]):
-            print(f"   ⚠️  NEW DEVICE DETECTED!")
+    if __name__ == "__main__":
+        import sys
+        import os
+        sys.path.append(os.path.join(os.path.dirname(__file__), ".."))
+        from db.database import init_db, save_devices, is_new_device
+        from scanner.port_scanner import scan_ports
 
-        open_ports = scan_ports(device["ip"])
-        if open_ports:
-            print(f"   Open ports: {open_ports}")
-        else:
-            print(f"   No common open ports found.")
-        print()
+        ip_range = "192.168.1.0/24"
+        print(f"Scanning {ip_range} ...")
+        found_devices = scan(ip_range)
 
-    save_devices(found_devices)
-    print("✅ Devices saved to database.")
+        print(f"\nFound {len(found_devices)} device(s):\n")
+
+        init_db()
+
+        for device in found_devices:
+            print(f"{device['ip']:<18}{device['mac']:<20}{device['vendor']}")
+            if is_new_device(device["mac"]):
+                print(f"   ⚠️  NEW DEVICE DETECTED!")
+
+            open_ports = scan_ports(device["ip"])
+            if open_ports:
+                for p in open_ports:
+                    print(f"   Port {p['port']:<6} Risk: {p['risk_level']:<8} {p['reason']}")
+            else:
+                print(f"   No common open ports found.")
+            print()
+
+        save_devices(found_devices)
+        print("✅ Devices saved to database.")
