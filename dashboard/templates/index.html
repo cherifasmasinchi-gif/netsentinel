@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>NetSentinel Dashboard</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 40px; background: #f4f4f4; }
+        h1 { color: #2c3e50; }
+        table { width: 100%; border-collapse: collapse; background: white; }
+        th, td { padding: 10px 14px; text-align: left; border-bottom: 1px solid #ddd; }
+        th { background: #2c3e50; color: white; }
+        tr:hover { background: #f1f1f1; }
+    </style>
+</head>
+<body>
+    <h1>🛡️ NetSentinel Dashboard</h1>
+    <p>Devices found on your network:</p>
+
+    <table>
+        <tr>
+            <th>IP Address</th>
+            <th>MAC Address</th>
+            <th>Vendor</th>
+            <th>First Seen</th>
+            <th>Last Seen</th>
+        </tr>
+        {% for device in devices %}
+        <tr>
+            <td>{{ device.ip }}</td>
+            <td>{{ device.mac }}</td>
+            <td>{{ device.vendor }}</td>
+            <td>{{ device.first_seen }}</td>
+            <td>{{ device.last_seen }}</td>
+        </tr>
+        {% endfor %}
+    </table>
+</body>
+</html>
