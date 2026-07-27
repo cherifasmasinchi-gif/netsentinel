@@ -10,10 +10,37 @@
         th, td { padding: 10px 14px; text-align: left; border-bottom: 1px solid #ddd; }
         th { background: #2c3e50; color: white; }
         tr:hover { background: #f1f1f1; }
+        .badge {
+            padding: 4px 10px;
+            border-radius: 12px;
+            color: white;
+            font-size: 0.85em;
+            font-weight: bold;
+        }
+        .badge-high { background: #e74c3c; }
+        .badge-medium { background: #f39c12; }
+        .badge-low { background: #27ae60; }
+        .badge-none { background: #95a5a6; }
+        .scan-btn {
+            background: #2c3e50;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 1em;
+            margin-bottom: 20px;
+        }
+        .scan-btn:hover { background: #1a252f; }
     </style>
 </head>
 <body>
     <h1>🛡️ NetSentinel Dashboard</h1>
+
+    <form action="/scan" method="post">
+        <button class="scan-btn" type="submit">🔄 Scan Now</button>
+    </form>
+
     <p>Devices found on your network:</p>
 
     <table>
@@ -21,6 +48,7 @@
             <th>IP Address</th>
             <th>MAC Address</th>
             <th>Vendor</th>
+            <th>Risk</th>
             <th>First Seen</th>
             <th>Last Seen</th>
         </tr>
@@ -29,6 +57,17 @@
             <td>{{ device.ip }}</td>
             <td>{{ device.mac }}</td>
             <td>{{ device.vendor }}</td>
+            <td>
+                {% if device.risk == "HIGH" %}
+                    <span class="badge badge-high">🔴 HIGH</span>
+                {% elif device.risk == "MEDIUM" %}
+                    <span class="badge badge-medium">🟡 MEDIUM</span>
+                {% elif device.risk == "LOW" %}
+                    <span class="badge badge-low">🟢 LOW</span>
+                {% else %}
+                    <span class="badge badge-none">⚪ NONE</span>
+                {% endif %}
+            </td>
             <td>{{ device.first_seen }}</td>
             <td>{{ device.last_seen }}</td>
         </tr>

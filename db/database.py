@@ -60,15 +60,34 @@ def save_devices(devices):
 
 
 def get_all_devices():
+    """
+    Returns every device, along with its highest risk level found
+    among its open ports (or 'NONE' if no risky ports are open).
+    """
     conn = sqlite3.connect(DB_PATH)
     conn.row_factory = sqlite3.Row
     cursor = conn.cursor()
 
     cursor.execute("SELECT * FROM devices ORDER BY last_seen DESC")
-    rows = cursor.fetchall()
+    devices = [dict(row) for row in cursor.fetchall()]
+
+    for device in devices:
+        cursor.execute("""
+            SELECT risk_level FROM ports WHERE device_mac = ?
+        """, (device["mac"],))
+        risk_levels = [row["risk_level"] for row in cursor.fetchall()]
+
+        if "HIGH" in risk_levels:
+            device["risk"] = "HIGH"
+        elif "MEDIUM" in risk_levels:
+            device["risk"] = "MEDIUM"
+        elif risk_levels:
+            device["risk"] = "LOW"
+        else:
+            device["risk"] = "NONE"
 
     conn.close()
-    return [dict(row) for row in rows]
+    return devices
 
 def is_new_device(mac):
     conn = sqlite3.connect(DB_PATH)
