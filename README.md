@@ -1,4 +1,3 @@
-[README (1).md](https://github.com/user-attachments/files/30427117/README.1.md)
 # NetSentinel
 
 A Python tool that scans your local network, discovers connected devices, identifies their manufacturer, checks for risky open ports, tracks changes over time, and displays everything on a simple web dashboard.
