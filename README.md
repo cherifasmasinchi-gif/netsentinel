@@ -72,9 +72,7 @@ pytest
 ```
 
 ## Screenshots
-
-*(Add a screenshot of the dashboard here, showing the device table with risk badges)*
-
+![NetSentinel Dashboard](screenshots/dashboard.png)
 ## Roadmap / Status
 
 - [x] Project setup
